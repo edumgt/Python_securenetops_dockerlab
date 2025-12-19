@@ -1,0 +1,17 @@
+policy:
+  allowlisted_endpoints:
+    - name: "controller_api"
+      host: "172.30.0.10"
+      ports: [8000]
+    - name: "target_web"
+      host: "172.30.0.20"
+      ports: [8080]
+  http_headers_required:
+    # target_web 응답에서 아래 헤더가 있으면 "권장 설정"으로 점수화
+    # (실제 운영에서는 더 엄격한 기준/조직 정책에 맞춰 정의)
+    - "x-content-type-options"
+    - "x-frame-options"
+  secrets_rules:
+    # 보고서/로그에 토큰이 그대로 나오지 않도록 마스킹 규칙 점검
+    forbid_patterns:
+      - "dev-token-please-change"

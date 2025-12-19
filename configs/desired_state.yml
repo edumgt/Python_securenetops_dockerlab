@@ -1,0 +1,10 @@
+# "목적 중심 네트워킹" 교육용 desired state
+# controller_api가 이 상태로 수렴(converge)하도록 Python이 API를 호출합니다.
+desired_state:
+  firewall_policy:
+    # web 서비스는 8080만 허용(교육용 예시)
+    target_web_allowed_inbound_ports: [8080]
+  monitoring_policy:
+    # 모니터링 임계치(교육용 예시)
+    web_latency_ms_warn: 250
+    web_latency_ms_crit: 600

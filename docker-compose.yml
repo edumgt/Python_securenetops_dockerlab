@@ -1,0 +1,67 @@
+services:
+  controller_api:
+    build:
+      context: .
+      dockerfile: services/controller_api/Dockerfile
+    environment:
+      - CONTROLLER_API_TOKEN=${CONTROLLER_API_TOKEN}
+    ports:
+      - "8000:8000"
+    networks:
+      netlab:
+        ipv4_address: 172.30.0.10
+
+  target_web:
+    build:
+      context: .
+      dockerfile: services/target_web/Dockerfile
+    environment:
+      - APP_ENV=lab
+    ports:
+      - "8080:8080"
+    networks:
+      netlab:
+        ipv4_address: 172.30.0.20
+
+  monitor:
+    build:
+      context: .
+      dockerfile: services/monitor/Dockerfile
+    environment:
+      - CONTROLLER_API_TOKEN=${CONTROLLER_API_TOKEN}
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
+    volumes:
+      - ./data:/data
+      - ./reports:/app/reports
+      - ./configs:/app/configs:ro
+    depends_on:
+      - controller_api
+      - target_web
+    networks:
+      netlab:
+        ipv4_address: 172.30.0.30
+
+  client:
+    build:
+      context: .
+      dockerfile: services/client/Dockerfile
+    environment:
+      - CONTROLLER_API_TOKEN=${CONTROLLER_API_TOKEN}
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
+    volumes:
+      - ./reports:/app/reports
+      - ./configs:/app/configs:ro
+    depends_on:
+      - controller_api
+      - target_web
+    tty: true
+    networks:
+      netlab:
+        ipv4_address: 172.30.0.40
+
+networks:
+  netlab:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
