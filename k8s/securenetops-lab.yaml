@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: securenetops-lab
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller-api
+  namespace: securenetops-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: controller-api
+  template:
+    metadata:
+      labels:
+        app: controller-api
+    spec:
+      containers:
+        - name: controller-api
+          image: securenetops/controller-api:local
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CONTROLLER_API_TOKEN
+              value: dev-token-please-change
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: controller-api
+  namespace: securenetops-lab
+spec:
+  selector:
+    app: controller-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: target-web
+  namespace: securenetops-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: target-web
+  template:
+    metadata:
+      labels:
+        app: target-web
+    spec:
+      containers:
+        - name: target-web
+          image: securenetops/target-web:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: target-web
+  namespace: securenetops-lab
+spec:
+  selector:
+    app: target-web
+  ports:
+    - port: 8080
+      targetPort: 8080
